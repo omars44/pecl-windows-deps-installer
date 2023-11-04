@@ -1,0 +1,63 @@
+name: 'PECL Windows Dependency Installer (vcpkg)'
+description: 'Installs Windows dependencies using vcpkg for PECL extensions'
+branding:
+  icon: 'package'
+  color: 'blue'
+
+inputs:
+  cache-hit:
+    description: 'Whether the cache was hit'
+    required: true
+  libraries:
+    description: 'Libraries to install with vcpkg, comma-separated'
+    required: true
+  target-prefix:
+    description: 'Target directory prefix where the dependencies will be installed'
+    required: false
+    default: './../deps'
+  vcpkg-version:
+    description: 'Specific version of vcpkg to use'
+    required: false
+    default: 'latest'
+  arch:
+    description: 'Build architecture for the libraries (x64 or x86)'
+    required: true
+    default: 'x64'
+
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+        $cacheHit = "${{ inputs.cache-hit }}"
+        $libraries = "${{ inputs.libraries }}"
+        $targetPrefix = "${{ inputs.target-prefix }}"
+        $vcpkgVersion = "${{ inputs.vcpkg-version }}"
+        $arch = "${{ inputs.arch }}"
+        
+        $windowsArch = "$arch-windows"
+        $windowsStaticArch = "$arch-windows-static"
+        
+        if ($cacheHit -ne 'true') {
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          if ($vcpkgVersion -ne 'latest') {
+            git checkout $vcpkgVersion
+          }
+          .\bootstrap-vcpkg.bat
+          foreach ($lib in $libraries -split ',') {
+            .\vcpkg.exe install $lib --triplet $windowsStaticArch
+            .\vcpkg.exe install $lib --triplet $windowsArch
+          }
+          Copy-Item -Path "vcpkg/installed/$windowsStaticArch/lib/*_a.lib" -Destination "$targetPrefix/lib/" -Recurse
+          Copy-Item -Path "vcpkg/installed/$windowsArch/lib/*.lib" -Destination "$targetPrefix/lib/" -Recurse
+          Copy-Item -Path "vcpkg/installed/$windowsArch/include/*" -Destination "$targetPrefix/include/" -Recurse -Force
+        }
+      shell: pwsh
+      id: install-deps
+
+    - run: |
+        echo "Dependencies installed in $targetPrefix"
+        Get-ChildItem -Path "$targetPrefix/lib" -Name
+      shell: pwsh
+      id: post-install
+
