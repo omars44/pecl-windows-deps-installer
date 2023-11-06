@@ -1,26 +1,18 @@
 # PECL Windows Dependency Installer (vcpkg)
 
-This action installs Windows dependencies using vcpkg for PECL extensions.
+On top of supported pecl library dependencies
 
 used in conjunction with https://github.com/derickr/setup-php-sdk
 
 ## Inputs
 
-### `cache-hit`
 
-**Required** Whether the cache was hit.
-
-### `libraries`
-
-**Required** Libraries to install with vcpkg, comma-separated.
-
-### `target-prefix`
-
-**Optional** Target directory prefix where the dependencies will be installed. Default `".\..\deps"`
-
-### `vcpkg-version`
-
-**Optional** Specific version of vcpkg to use. Default `"latest"`.
+| Inputs          | Required/Optional | Description                                                                 | Default Value     |
+|-----------------|-------------------|-----------------------------------------------------------------------------|-------------------|
+| cache-hit       | Required          | Whether the cache was hit.                                                  | N/A               |
+| libraries       | Required          | Libraries to install with vcpkg, comma-separated.                           | N/A               |
+| target-prefix   | Optional          | Target directory prefix where the dependencies will be installed.           | `./../deps`       |
+| vcpkg-version   | Optional          | Specific version of vcpkg to use.                                           | `latest`          |
 
 ## Example usage
 
@@ -44,13 +36,11 @@ jobs:
             vcpkg-${{ runner.os }}-
 
       - name: Install dependencies with vcpkg
-        uses: omars44/pecl-windows-deps-installer-action@v1
+        uses: omars44/pecl-windows-deps-installer@master
         with:
           cache-hit: ${{ steps.cache-vcpkg.outputs.cache-hit }}
           libraries: 'zlib,libxml2'
-          arch: 'x64' # or 'x86'
-          target-prefix: '../deps' # optional
-          
+          arch: 'x64'
 ```
 
 
