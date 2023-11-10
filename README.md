@@ -1,8 +1,8 @@
 # PECL Windows Dependency Installer (vcpkg)
 
-On top of supported pecl library dependencies
+On top of supported pecl library dependencies (https://windows.php.net/downloads/php-sdk/deps/). If there is a missing dependency, then this action would be of help.
 
-used in conjunction with https://github.com/derickr/setup-php-sdk
+can be used in conjunction with https://github.com/derickr/setup-php-sdk
 
 ## Inputs
 
