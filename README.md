@@ -31,9 +31,9 @@ jobs:
           path: |
             vcpkg
             vcpkg/installed
-          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+          key: vcpkg-${{ hashFiles('**/vcpkg.json') }}
           restore-keys: |
-            vcpkg-${{ runner.os }}-
+            vcpkg-
 
       - name: Install dependencies with vcpkg
         uses: omars44/pecl-windows-deps-installer@master

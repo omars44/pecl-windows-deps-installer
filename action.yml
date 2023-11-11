@@ -27,7 +27,10 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - run: |
+    
+    - id: install-deps
+      shell: powershell
+      run: |
         $cacheHit = "${{ inputs.cache-hit }}"
         $libraries = "${{ inputs.libraries }}"
         $targetPrefix = "${{ inputs.target-prefix }}"
@@ -36,8 +39,15 @@ runs:
         
         $windowsArch = "$arch-windows"
         $windowsStaticArch = "$arch-windows-static"
-        
+
         if ($cacheHit -ne 'true') {
+          $cwd = $env:GITHUB_WORKSPACE
+
+          # convert to absolute path if a relative target path is specified
+          if (-Not [System.IO.Path]::IsPathRooted($targetPrefix)) {
+              $targetPrefix = Join-Path -Path $cwd -ChildPath $targetPrefix
+          }
+          cd ../
           git clone https://github.com/microsoft/vcpkg.git
           cd vcpkg
           if ($vcpkgVersion -ne 'latest') {
@@ -48,16 +58,15 @@ runs:
             .\vcpkg.exe install $lib --triplet $windowsStaticArch
             .\vcpkg.exe install $lib --triplet $windowsArch
           }
-          Copy-Item -Path "vcpkg/installed/$windowsStaticArch/lib/*_a.lib" -Destination "$targetPrefix/lib/" -Recurse
-          Copy-Item -Path "vcpkg/installed/$windowsArch/lib/*.lib" -Destination "$targetPrefix/lib/" -Recurse
-          Copy-Item -Path "vcpkg/installed/$windowsArch/include/*" -Destination "$targetPrefix/include/" -Recurse -Force
+          Copy-Item -Path "./vcpkg/installed/$windowsStaticArch/lib/*_a.lib" -Destination "$targetPrefix/lib/" -Recurse
+          Copy-Item -Path "./vcpkg/installed/$windowsArch/lib/*.lib" -Destination "$targetPrefix/lib/" -Recurse
+          Copy-Item -Path "./vcpkg/installed/$windowsArch/include/*" -Destination "$targetPrefix/include/" -Recurse -Force
         }
-      shell: pwsh
-      id: install-deps
+      
 
-    - run: |
+    - id: post-install
+      run: |
         echo "Dependencies installed in $targetPrefix"
         Get-ChildItem -Path "$targetPrefix/lib" -Name
       shell: pwsh
-      id: post-install
 
