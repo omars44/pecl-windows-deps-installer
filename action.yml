@@ -58,9 +58,9 @@ runs:
             .\vcpkg.exe install $lib --triplet $windowsStaticArch
             .\vcpkg.exe install $lib --triplet $windowsArch
           }
-          Copy-Item -Path "./vcpkg/installed/$windowsStaticArch/lib/*_a.lib" -Destination "$targetPrefix/lib/" -Recurse
-          Copy-Item -Path "./vcpkg/installed/$windowsArch/lib/*.lib" -Destination "$targetPrefix/lib/" -Recurse
-          Copy-Item -Path "./vcpkg/installed/$windowsArch/include/*" -Destination "$targetPrefix/include/" -Recurse -Force
+          Copy-Item -Path "./installed/$windowsStaticArch/lib/*_a.lib" -Destination "$targetPrefix/lib/" -Recurse
+          Copy-Item -Path "./installed/$windowsArch/lib/*.lib" -Destination "$targetPrefix/lib/" -Recurse
+          Copy-Item -Path "./installed/$windowsArch/include/*" -Destination "$targetPrefix/include/" -Recurse -Force
         }
       
 
