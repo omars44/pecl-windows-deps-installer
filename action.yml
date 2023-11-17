@@ -39,17 +39,12 @@ runs:
         
         $windowsArch = "$arch-windows"
         $windowsStaticArch = "$arch-windows-static"
-        
-        
+
+        $cwd = (Get-Location).Path
+        if (-Not [System.IO.Path]::IsPathRooted($targetPrefix)) {
+          $targetPrefix = Join-Path -Path $cwd -ChildPath $targetPrefix
+        }
         if ($cacheHit -ne 'true') {
-          $cwd = (Get-Location).Path
-
-          # convert to absolute path if a relative target path is specified
-          if (-Not [System.IO.Path]::IsPathRooted($targetPrefix)) {
-              $targetPrefix = Join-Path -Path $cwd -ChildPath $targetPrefix
-          }
-
-          cd ../
           git clone https://github.com/microsoft/vcpkg.git
           cd vcpkg
           if ($vcpkgVersion -ne 'latest') {
@@ -61,9 +56,12 @@ runs:
             .\vcpkg.exe install $lib --triplet $windowsArch
           }
           Copy-Item -Path "./installed/$windowsStaticArch/lib/*_a.lib" -Destination "$targetPrefix/lib/" -Recurse
-          Copy-Item -Path "./installed/$windowsArch/lib/*.lib" -Destination "$targetPrefix/lib/" -Recurse
-          Copy-Item -Path "./installed/$windowsArch/include/*" -Destination "$targetPrefix/include/" -Recurse -Force
+        } else {
+          cd vcpkg
         }
+        
+        Copy-Item -Path "./installed/$windowsArch/lib/*.lib" -Destination "$targetPrefix/lib/" -Recurse
+        Copy-Item -Path "./installed/$windowsArch/include/*" -Destination "$targetPrefix/include/" -Recurse -Force
       
 
     - id: post-install
@@ -72,4 +70,3 @@ runs:
         echo "Dependencies installed in $targetPrefix"
         Get-ChildItem -Path "$targetPrefix/lib" -Name
       shell: pwsh
-
